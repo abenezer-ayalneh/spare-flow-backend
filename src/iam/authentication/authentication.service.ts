@@ -57,7 +57,7 @@ export default class AuthenticationService {
 
 		const isEqual = await this.hashingService.compare(signInDto.password, user.password)
 		if (!isEqual) {
-			throw new UnauthorizedException('Email or password mismatch')
+			throw new UnauthorizedException('Username or password mismatch')
 		}
 
 		return this.generateTokens(user)

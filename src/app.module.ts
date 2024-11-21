@@ -1,6 +1,7 @@
 import { CacheModule } from '@nestjs/cache-manager'
-import { Module } from '@nestjs/common'
+import { Logger, Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
+import { APP_FILTER } from '@nestjs/core'
 import { redisStore } from 'cache-manager-redis-yet'
 import type { RedisClientOptions } from 'redis'
 
@@ -8,6 +9,7 @@ import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import IamModule from './iam/iam.module'
 import { PrismaModule } from './prisma/prisma.module'
+import GlobalExceptionFilter from './utils/filters/global-exception.filter'
 
 @Module({
 	imports: [
@@ -26,6 +28,6 @@ import { PrismaModule } from './prisma/prisma.module'
 		IamModule,
 	],
 	controllers: [AppController],
-	providers: [AppService],
+	providers: [AppService, Logger, { provide: APP_FILTER, useClass: GlobalExceptionFilter }],
 })
 export class AppModule {}
