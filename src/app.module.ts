@@ -2,6 +2,7 @@ import { CacheModule } from '@nestjs/cache-manager'
 import { Logger, Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { APP_FILTER } from '@nestjs/core'
+import { ThrottlerModule } from '@nestjs/throttler'
 import { redisStore } from 'cache-manager-redis-yet'
 import type { RedisClientOptions } from 'redis'
 
@@ -18,11 +19,21 @@ import GlobalExceptionFilter from './utils/filters/global-exception.filter'
 			isGlobal: true,
 			imports: [ConfigModule],
 			inject: [ConfigService],
-			useFactory: async (config: ConfigService) => ({
+			useFactory: async (configService: ConfigService) => ({
 				store: await redisStore({
-					url: config.get('REDIS_URL'),
+					url: configService.get('REDIS_URL'),
 				}),
 			}),
+		}),
+		ThrottlerModule.forRootAsync({
+			imports: [ConfigModule],
+			inject: [ConfigService],
+			useFactory: (configService: ConfigService) => [
+				{
+					ttl: configService.get('THROTTLER_TTL'),
+					limit: configService.get('THROTTLER_LIMIT'),
+				},
+			],
 		}),
 		PrismaModule,
 		IamModule,
