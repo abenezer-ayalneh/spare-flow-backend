@@ -10,6 +10,8 @@ import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import IamModule from './iam/iam.module'
 import { PrismaModule } from './prisma/prisma.module'
+import { RolesModule } from './roles/roles.module'
+import { UsersModule } from './users/users.module'
 import GlobalExceptionFilter from './utils/filters/global-exception.filter'
 
 @Module({
@@ -37,6 +39,8 @@ import GlobalExceptionFilter from './utils/filters/global-exception.filter'
 		}),
 		PrismaModule,
 		IamModule,
+		UsersModule,
+		RolesModule,
 	],
 	controllers: [AppController],
 	providers: [AppService, Logger, { provide: APP_FILTER, useClass: GlobalExceptionFilter }],
