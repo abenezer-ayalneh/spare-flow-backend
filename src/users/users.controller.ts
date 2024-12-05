@@ -1,17 +1,23 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common'
 
+import HashingService from '../iam/hashing/hashing.service'
 import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
 import { UsersService } from './users.service'
 
 @Controller('users')
 export class UsersController {
-	constructor(private readonly usersService: UsersService) {}
+	constructor(
+		private readonly usersService: UsersService,
+		private readonly hashingService: HashingService,
+	) {}
 
 	@Post()
-	create(@Body() createUserDto: CreateUserDto) {
+	async create(@Body() createUserDto: CreateUserDto) {
 		const password = this.usersService.generateSecureRandomPassword()
-		return this.usersService.create(createUserDto, password)
+		const hashedPassword = await this.hashingService.hash(password)
+
+		return this.usersService.create(createUserDto, hashedPassword)
 	}
 
 	@Get()

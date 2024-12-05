@@ -1,33 +1,28 @@
 import { Injectable } from '@nestjs/common'
 import * as crypto from 'crypto'
 
-import HashingService from '../iam/hashing/hashing.service'
 import { PrismaService } from '../prisma/prisma.service'
 import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
 
 @Injectable()
 export class UsersService {
-	constructor(
-		private readonly prismaService: PrismaService,
-		private readonly hashingService: HashingService,
-	) {}
+	constructor(private readonly prismaService: PrismaService) {}
 
 	async create(createUserDto: CreateUserDto, password: string) {
-		const hashedPassword = await this.hashingService.hash(password)
-		return this.prismaService.user.create({ data: { ...createUserDto, password: hashedPassword } })
+		return this.prismaService.user.create({ data: { ...createUserDto, password }, include: { Role: true } })
 	}
 
 	findAll() {
-		return this.prismaService.user.findMany({})
+		return this.prismaService.user.findMany({ include: { Role: true }, orderBy: { createdAt: 'desc' } })
 	}
 
 	findOne(id: number) {
-		return this.prismaService.user.findUnique({ where: { id } })
+		return this.prismaService.user.findUnique({ where: { id }, include: { Role: true } })
 	}
 
 	update(id: number, updateUserDto: UpdateUserDto) {
-		return this.prismaService.user.update({ where: { id }, data: updateUserDto })
+		return this.prismaService.user.update({ where: { id }, data: updateUserDto, include: { Role: true } })
 	}
 
 	remove(id: number) {
