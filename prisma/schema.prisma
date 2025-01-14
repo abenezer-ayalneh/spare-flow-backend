@@ -25,7 +25,9 @@ model User {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime? @updatedAt
 
-  Role Role @relation(fields: [roleId], references: [id])
+  Role     Role       @relation(fields: [roleId], references: [id])
+  Transfer Transfer[]
+  Sale     Sale[]
 
   @@map("users")
 }
@@ -36,7 +38,117 @@ model Role {
   description String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime? @updatedAt
-  User        User[]
+
+  User User[]
 
   @@map("roles")
+}
+
+model Item {
+  id          Int        @id @default(autoincrement())
+  name        String
+  partNumber  String
+  description String?
+  price       Decimal
+  source      ItemSource
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime?  @updatedAt
+
+  ShelfItem ShelfItem[]
+  Sale      Sale[]
+  Transfer  Transfer[]
+
+  @@map("items")
+}
+
+enum ItemSource {
+  ORIGINAL
+  LOCAL
+}
+
+model Store {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime? @updatedAt
+
+  Shelf             Shelf[]
+  SentTransfers     Transfer[] @relation(name: "fromTransfer")
+  ReceivedTransfers Transfer[] @relation(name: "toTransfer")
+
+  @@map("stores")
+}
+
+model Shelf {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String?
+  storeId     Int
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime? @updatedAt
+
+  Store     Store       @relation(fields: [storeId], references: [id])
+  ShelfItem ShelfItem[]
+
+  @@map("shelves")
+}
+
+model Transfer {
+  id          Int            @id @default(autoincrement())
+  itemId      Int
+  fromStoreId Int
+  toStoreId   Int
+  userId      Int
+  status      TransferStatus
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime?      @updatedAt
+
+  Item        Item  @relation(fields: [itemId], references: [id])
+  FromStore   Store @relation(fields: [fromStoreId], references: [id], name: "fromTransfer")
+  ToStore     Store @relation(fields: [toStoreId], references: [id], name: "toTransfer")
+  SalesPerson User  @relation(fields: [userId], references: [id])
+
+  @@map("transfers")
+}
+
+enum TransferStatus {
+  INITIATED
+  DONE
+}
+
+model ShelfItem {
+  id              Int       @id @default(autoincrement())
+  itemId          Int
+  shelfLocationId Int
+  quantity        Int
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime? @updatedAt
+
+  Item          Item  @relation(fields: [itemId], references: [id])
+  ShelfLocation Shelf @relation(fields: [shelfLocationId], references: [id])
+
+  @@map("shelf-item")
+}
+
+model Sale {
+  id         Int        @id @default(autoincrement())
+  itemId     Int
+  clientName String
+  userId     Int
+  quantity   Int
+  price      Decimal
+  status     SaleStatus
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime?  @updatedAt
+
+  Item        Item @relation(fields: [itemId], references: [id])
+  SalesPerson User @relation(fields: [userId], references: [id])
+
+  @@map("sales")
+}
+
+enum SaleStatus {
+  PENDING
+  PRINTED
 }

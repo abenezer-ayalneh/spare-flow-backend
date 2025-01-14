@@ -10,7 +10,7 @@ export class UsersService {
 	constructor(private readonly prismaService: PrismaService) {}
 
 	async create(createUserDto: CreateUserDto, password: string) {
-		return this.prismaService.user.create({ data: { ...createUserDto, password }, include: { Role: true } })
+		return this.prismaService.user.create({ data: { ...createUserDto, password }, include: { Role: { select: { id: true, name: true } } } })
 	}
 
 	findAll() {

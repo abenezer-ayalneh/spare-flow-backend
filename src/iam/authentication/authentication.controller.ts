@@ -32,8 +32,8 @@ export default class AuthenticationController {
 
 	@Auth(AuthType.Bearer)
 	@Get('check-token')
-	checkToken(@ActiveUser('sub') playerId: string) {
-		return this.authService.checkToken(+playerId)
+	checkToken(@ActiveUser('sub') userId: string) {
+		return this.authService.checkToken(+userId)
 	}
 
 	// @HttpCode(HttpStatus.OK)

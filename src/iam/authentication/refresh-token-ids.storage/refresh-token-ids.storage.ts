@@ -10,20 +10,20 @@ export default class RefreshTokenIdsStorage implements OnApplicationShutdown {
 		return this.cacheManager.reset()
 	}
 
-	private getKey(playerId: number): string {
-		return `player-${playerId}`
+	private getKey(userId: number): string {
+		return `user-${userId}`
 	}
 
-	async insert(playerId: number, tokenId: string): Promise<void> {
-		await this.cacheManager.set(this.getKey(playerId), tokenId)
+	async insert(userId: number, tokenId: string): Promise<void> {
+		await this.cacheManager.set(this.getKey(userId), tokenId)
 	}
 
-	async validate(playerId: number, tokenId: string): Promise<boolean> {
-		const storedId = await this.cacheManager.get(this.getKey(playerId))
+	async validate(userId: number, tokenId: string): Promise<boolean> {
+		const storedId = await this.cacheManager.get(this.getKey(userId))
 		return storedId === tokenId
 	}
 
-	async invalidate(playerId: number): Promise<void> {
-		await this.cacheManager.del(this.getKey(playerId))
+	async invalidate(userId: number): Promise<void> {
+		await this.cacheManager.del(this.getKey(userId))
 	}
 }

@@ -9,13 +9,13 @@ import AccessTokenGuard from './access-token.guard'
 
 describe('AccessTokenGuard', () => {
 	let accessTokenGuard: AccessTokenGuard
-	const mockPlayer = {
+	const mockUser = {
 		id: 1,
 		username: 'john.doe',
 		password: 'hashedPassword',
 	} as User
 	const mockJwtService = {
-		verifyAsync: jest.fn().mockReturnValue(mockPlayer),
+		verifyAsync: jest.fn().mockReturnValue(mockUser),
 	}
 	const mockJwtConfiguration = {
 		secret: '33MDF2rsjXjnuguK4wiv7TORMJimHLdgiOBupn0r5IfhVQ6K',
@@ -59,7 +59,7 @@ describe('AccessTokenGuard', () => {
 			headers: {
 				authorization: 'Bearer valid-token',
 			},
-			player: undefined,
+			user: undefined,
 		}
 		const executionContext = {
 			switchToHttp: () => ({
@@ -74,7 +74,7 @@ describe('AccessTokenGuard', () => {
 		expect.assertions(3)
 		expect(result).toBe(true)
 		expect(mockRequest[REQUEST_USER_KEY]).toBeDefined()
-		expect(mockRequest[REQUEST_USER_KEY]).toBe(mockPlayer)
+		expect(mockRequest[REQUEST_USER_KEY]).toBe(mockUser)
 	})
 
 	it('canActivate => should throw UnauthorizedException if token is not available', async () => {
