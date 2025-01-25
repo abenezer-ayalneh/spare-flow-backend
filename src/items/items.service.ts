@@ -3,6 +3,7 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { PrismaService } from '../prisma/prisma.service'
 import { CreateItemDto } from './dto/create-item.dto'
 import { UpdateItemDto } from './dto/update-item.dto'
+import { UpdatePriceDto } from './dto/update-price.dto'
 
 @Injectable()
 export class ItemsService {
@@ -94,5 +95,14 @@ export class ItemsService {
 		}
 
 		return true
+	}
+
+	updatePrice(id: number, updatePriceDto: UpdatePriceDto) {
+		return this.prismaService.item.update({
+			where: { id },
+			data: {
+				price: updatePriceDto.price,
+			},
+		})
 	}
 }
