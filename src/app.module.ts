@@ -12,6 +12,7 @@ import IamModule from './iam/iam.module'
 import { ItemsModule } from './items/items.module'
 import { PrismaModule } from './prisma/prisma.module'
 import { RolesModule } from './roles/roles.module'
+import { ShelfItemModule } from './shelf-item/shelf-item.module'
 import { ShelvesModule } from './shelves/shelves.module'
 import { StoresModule } from './stores/stores.module'
 import { UsersModule } from './users/users.module'
@@ -47,6 +48,7 @@ import GlobalExceptionFilter from './utils/filters/global-exception.filter'
 		ItemsModule,
 		StoresModule,
 		ShelvesModule,
+		ShelfItemModule,
 	],
 	controllers: [AppController],
 	providers: [AppService, Logger, { provide: APP_FILTER, useClass: GlobalExceptionFilter }],
