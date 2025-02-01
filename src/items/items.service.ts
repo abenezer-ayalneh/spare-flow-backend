@@ -39,6 +39,9 @@ export class ItemsService {
 					},
 				},
 			},
+			orderBy: {
+				createdAt: 'desc',
+			},
 		})
 	}
 
@@ -79,6 +82,9 @@ export class ItemsService {
 				quantity: true,
 				Item: { select: { id: true, name: true, price: true, source: true, description: true, partNumber: true } },
 				ShelfLocation: { select: { id: true, name: true, Store: { select: { id: true, name: true } } } },
+			},
+			orderBy: {
+				createdAt: 'desc',
 			},
 		})
 	}
