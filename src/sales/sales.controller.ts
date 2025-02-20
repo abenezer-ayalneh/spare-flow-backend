@@ -2,6 +2,8 @@ import { Body, Controller, NotFoundException, Post } from '@nestjs/common'
 
 import ActiveUser from '../iam/decorators/active-user.decorator'
 import { ItemsService } from '../items/items.service'
+import { Roles } from '../roles/decorators/roles.decorator'
+import { Role } from '../roles/types/roles.type'
 import { CreateSalesDto } from './dto/create-sales.dto'
 import { SalesService } from './sales.service'
 
@@ -13,6 +15,7 @@ export class SalesController {
 	) {}
 
 	@Post()
+	@Roles(Role.ADMIN, Role.SALES)
 	async createSales(@ActiveUser('sub') userId: number, @Body() createSalesDto: CreateSalesDto) {
 		// Check if the item with the provided item ID exists in the database
 		const item = await this.itemService.findOne(createSalesDto.itemId)

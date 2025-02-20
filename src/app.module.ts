@@ -2,6 +2,7 @@ import { CacheModule } from '@nestjs/cache-manager'
 import { Logger, Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { APP_FILTER } from '@nestjs/core'
+import { EventEmitterModule } from '@nestjs/event-emitter'
 import { ThrottlerModule } from '@nestjs/throttler'
 import { redisStore } from 'cache-manager-redis-yet'
 import type { RedisClientOptions } from 'redis'
@@ -42,6 +43,7 @@ import GlobalExceptionFilter from './utils/filters/global-exception.filter'
 				},
 			],
 		}),
+		EventEmitterModule.forRoot(),
 		PrismaModule,
 		IamModule,
 		UsersModule,

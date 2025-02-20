@@ -55,6 +55,10 @@ export default class AuthenticationService {
 			throw new UnauthorizedException('User does not exists')
 		}
 
+		if (!user.active) {
+			throw new UnauthorizedException('User is inactive')
+		}
+
 		const isEqual = await this.hashingService.compare(signInDto.password, user.password)
 		if (!isEqual) {
 			throw new UnauthorizedException('Username or password mismatch')
@@ -66,7 +70,7 @@ export default class AuthenticationService {
 	async generateTokens(user: User) {
 		const refreshTokenId = randomUUID()
 		const [accessToken, refreshToken] = await Promise.all([
-			this.signToken<Partial<ActiveUserData>>(user.id, this.jwtConfiguration.accessTokenTtl, { username: user.username }),
+			this.signToken<Partial<ActiveUserData>>(user.id, this.jwtConfiguration.accessTokenTtl, { username: user.username, roleId: user.roleId }),
 			this.signToken<Partial<RefreshTokenData>>(user.id, this.jwtConfiguration.refreshTokenTtl, { refreshTokenId }),
 		])
 		await this.refreshTokenIdsStorage.insert(user.id, refreshTokenId)
