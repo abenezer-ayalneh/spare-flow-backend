@@ -60,7 +60,7 @@ export class ItemsService {
 				ShelfItem: {
 					update: {
 						where: {
-							id: 1,
+							id: updateItemDto.shelfItemId,
 						},
 						data: {
 							shelfLocationId: updateItemDto.shelfId,
