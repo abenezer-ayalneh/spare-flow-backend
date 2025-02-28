@@ -28,7 +28,7 @@ async function main() {
 		{
 			name: 'Admin',
 			username: 'admin',
-			password: '$argon2id$v=19$m=65536,t=3,p=4$7OnlZ9aczsCtQmYPI0yi4w$BAMyy+V1yQEAPCXCbmpLYIv9Ny+4H9Y0AnJVj4mw8wA', // Password: passpass
+			password: '$2a$12$B561EYV/fsRwBC9nKaiVGuDglwwhUrpI6jvZxbeBaTQGm.4dlBvFO', // Password: passpass
 			phoneNumber: '+251912345678',
 			roleId: 1,
 		},
