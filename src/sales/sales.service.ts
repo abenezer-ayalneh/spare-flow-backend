@@ -1,34 +1,45 @@
+import * as crypto from 'node:crypto'
+
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { Item, SaleStatus } from '@prisma/client'
 
 import { PrismaService } from '../prisma/prisma.service'
-import { CreateSalesDto } from './dto/create-sales.dto'
+import { CreateSalesDto, ItemQuantityPair } from './dto/create-sales.dto'
 
 @Injectable()
 export class SalesService {
 	constructor(private readonly prismaService: PrismaService) {}
 
-	async createSales(item: Item, userId: number, createSalesDto: CreateSalesDto) {
-		await this.reduceFromStock(item.id, createSalesDto.quantity)
+	async createSales(items: Item[], userId: number, createSalesDto: CreateSalesDto) {
+		const transactionId = crypto.randomUUID()
 
-		return this.prismaService.sale.create({
-			data: {
-				clientName: createSalesDto.clientName,
-				quantity: createSalesDto.quantity,
-				price: createSalesDto.quantity * Number(item.price),
-				status: SaleStatus.PENDING,
-				Item: {
-					connect: {
-						id: createSalesDto.itemId,
+		await this.reduceFromStock(createSalesDto.itemQuantityPairs)
+
+		await this.prismaService.$transaction(
+			createSalesDto.itemQuantityPairs.map((itemQuantityPair) =>
+				this.prismaService.sale.create({
+					data: {
+						transactionId,
+						clientName: createSalesDto.clientName,
+						quantity: itemQuantityPair.quantity,
+						price: itemQuantityPair.quantity * Number(items.find((item) => item.id === itemQuantityPair.itemId).price),
+						status: SaleStatus.PENDING,
+						Item: {
+							connect: {
+								id: itemQuantityPair.itemId,
+							},
+						},
+						SalesPerson: {
+							connect: {
+								id: userId,
+							},
+						},
 					},
-				},
-				SalesPerson: {
-					connect: {
-						id: userId,
-					},
-				},
-			},
-		})
+				}),
+			),
+		)
+
+		return true
 	}
 
 	/**
@@ -57,21 +68,22 @@ export class SalesService {
 
 	/**
 	 * Find the item from the shelf-item table and decrement the provided quantity amount
-	 * @param itemId
-	 * @param quantity
+	 * @param itemQuantityPairs
 	 */
-	async reduceFromStock(itemId: number, quantity: number) {
-		let remainingQuantity = quantity
+	async reduceFromStock(itemQuantityPairs: ItemQuantityPair[]) {
 		const quantitiesToDecrement: Record<number, number> = {}
 
-		const shelfItems = await this.prismaService.shelfItem.findMany({ where: { itemId } })
+		for (const itemQuantityPair of itemQuantityPairs) {
+			let remainingQuantity = itemQuantityPair.quantity
+			const shelfItems = await this.prismaService.shelfItem.findMany({ where: { itemId: itemQuantityPair.itemId } })
 
-		for (const shelfItem of shelfItems) {
-			quantitiesToDecrement[shelfItem.id] = Math.min(shelfItem.quantity, remainingQuantity)
-			remainingQuantity -= Math.min(shelfItem.quantity, remainingQuantity)
+			for (const shelfItem of shelfItems) {
+				quantitiesToDecrement[shelfItem.id] = Math.min(shelfItem.quantity, remainingQuantity)
+				remainingQuantity -= Math.min(shelfItem.quantity, remainingQuantity)
 
-			if (remainingQuantity === 0) {
-				break
+				if (remainingQuantity === 0) {
+					break
+				}
 			}
 		}
 

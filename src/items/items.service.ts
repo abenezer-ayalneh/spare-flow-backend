@@ -45,6 +45,10 @@ export class ItemsService {
 		})
 	}
 
+	findMany(itemIds: number[]) {
+		return this.prismaService.item.findMany({ where: { id: { in: itemIds } } })
+	}
+
 	findOne(id: number) {
 		return this.prismaService.item.findUnique({ where: { id } })
 	}
