@@ -22,12 +22,15 @@ model User {
   phoneNumber String?
   roleId      Int
   active      Boolean   @default(true)
+  createdBy   Int
   createdAt   DateTime  @default(now())
   updatedAt   DateTime? @updatedAt
 
-  Role     Role       @relation(fields: [roleId], references: [id])
-  Transfer Transfer[]
-  Sale     Sale[]
+  Role         Role       @relation(fields: [roleId], references: [id])
+  Transfer     Transfer[]
+  Sale         Sale[]
+  Creator      User       @relation(fields: [createdBy], references: [id], name: "CreatorCreated")
+  CreatedUsers User[]     @relation(name: "CreatorCreated")
 
   @@map("users")
 }

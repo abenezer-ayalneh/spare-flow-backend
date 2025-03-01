@@ -1,5 +1,4 @@
-import { Injectable } from '@nestjs/common'
-import * as crypto from 'crypto'
+import { Injectable, UnprocessableEntityException } from '@nestjs/common'
 
 import { PrismaService } from '../prisma/prisma.service'
 import { CreateUserDto } from './dto/create-user.dto'
@@ -9,8 +8,21 @@ import { UpdateUserDto } from './dto/update-user.dto'
 export class UsersService {
 	constructor(private readonly prismaService: PrismaService) {}
 
-	async create(createUserDto: CreateUserDto, password: string) {
-		return this.prismaService.user.create({ data: { ...createUserDto, password }, include: { Role: { select: { id: true, name: true } } } })
+	async create(userId: number, createUserDto: CreateUserDto, password: string) {
+		delete createUserDto.confirmPassword
+
+		return this.prismaService.user.create({
+			data: {
+				name: createUserDto.name,
+				username: createUserDto.username,
+				phoneNumber: createUserDto.phoneNumber,
+				password,
+				active: createUserDto.active,
+				Role: { connect: { id: createUserDto.roleId } },
+				Creator: { connect: { id: userId } },
+			},
+			include: { Role: { select: { id: true, name: true } } },
+		})
 	}
 
 	findAll() {
@@ -18,10 +30,19 @@ export class UsersService {
 	}
 
 	findOne(id: number) {
-		return this.prismaService.user.findUnique({ where: { id }, include: { Role: true } })
+		return this.prismaService.user.findUnique({
+			where: { id },
+			include: { Role: true },
+		})
 	}
 
-	update(id: number, updateUserDto: UpdateUserDto) {
+	update(userId: number, id: number, updateUserDto: UpdateUserDto) {
+		// To avoid self update for role and active status
+		if (userId === id) {
+			delete updateUserDto.active
+			delete updateUserDto.roleId
+		}
+
 		return this.prismaService.user.update({ where: { id }, data: updateUserDto, include: { Role: true } })
 	}
 
@@ -29,13 +50,16 @@ export class UsersService {
 		return this.prismaService.user.delete({ where: { id } })
 	}
 
-	generateSecureRandomPassword(length: number = 12): string {
-		let password = ''
-
-		for (let i = 0; i < length; i++) {
-			password += String.fromCharCode((crypto.randomBytes(1)[0] % 94) + 33) // Generate random ASCII characters
+	comparePasswords(password: string, confirmPassword: string) {
+		if (password !== confirmPassword) {
+			throw new UnprocessableEntityException('Passwords do not match')
 		}
+	}
 
-		return password
+	updatePassword(userId: number, password: string) {
+		return this.prismaService.user.update({
+			where: { id: userId },
+			data: { password },
+		})
 	}
 }

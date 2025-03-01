@@ -42,7 +42,11 @@ export default class GlobalExceptionFilter implements ExceptionFilter {
 		}
 
 		// Log the error before responding
-		this.logger.error({ caughtException: exception }, stack)
+		if (exception instanceof Error) {
+			this.logger.error({ exception: { name: exception.name, message: exception.message } }, exception.stack)
+		} else {
+			this.logger.error({ exception: exception }, stack)
+		}
 
 		response.status(responseData.statusCode).json(responseData)
 	}

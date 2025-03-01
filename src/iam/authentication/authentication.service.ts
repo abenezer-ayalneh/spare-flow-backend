@@ -35,7 +35,7 @@ export default class AuthenticationService {
 			}
 			const password = await this.hashingService.hash(signUpDto.password)
 			await this.prismaService.user.create({
-				data: { username: signUpDto.username, password, name: signUpDto.name, roleId: signUpDto.roleId },
+				data: { username: signUpDto.username, password, name: signUpDto.name, roleId: signUpDto.roleId, createdBy: 0 },
 			})
 		} catch (e) {
 			if (e instanceof PrismaClientKnownRequestError) {
@@ -49,6 +49,9 @@ export default class AuthenticationService {
 
 	async signIn(signInDto: SignInDto) {
 		const user = await this.prismaService.user.findFirst({
+			omit: {
+				password: false,
+			},
 			where: { username: signInDto.username },
 		})
 		if (!user) {

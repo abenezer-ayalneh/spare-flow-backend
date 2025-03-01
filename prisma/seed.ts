@@ -31,6 +31,7 @@ async function main() {
 			password: '$2a$12$B561EYV/fsRwBC9nKaiVGuDglwwhUrpI6jvZxbeBaTQGm.4dlBvFO', // Password: passpass
 			phoneNumber: '+251912345678',
 			roleId: 1,
+			createdBy: 1,
 		},
 	]
 	await prisma.user.createMany({ data: users })

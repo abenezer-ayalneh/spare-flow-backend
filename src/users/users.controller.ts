@@ -1,5 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common'
 
+import ActiveUser from '../iam/decorators/active-user.decorator'
 import HashingService from '../iam/hashing/hashing.service'
 import { Roles } from '../roles/decorators/roles.decorator'
 import { Role } from '../roles/types/roles.type'
@@ -16,11 +17,11 @@ export class UsersController {
 
 	@Post()
 	@Roles(Role.ADMIN)
-	async create(@Body() createUserDto: CreateUserDto) {
-		const password = this.usersService.generateSecureRandomPassword()
-		const hashedPassword = await this.hashingService.hash(password)
+	async create(@ActiveUser('sub') userId: number, @Body() createUserDto: CreateUserDto) {
+		this.usersService.comparePasswords(createUserDto.password, createUserDto.confirmPassword)
+		const hashedPassword = await this.hashingService.hash(createUserDto.password)
 
-		return this.usersService.create(createUserDto, hashedPassword)
+		return this.usersService.create(userId, createUserDto, hashedPassword)
 	}
 
 	@Get()
@@ -35,8 +36,17 @@ export class UsersController {
 
 	@Patch(':id')
 	@Roles(Role.ADMIN)
-	update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-		return this.usersService.update(+id, updateUserDto)
+	update(@ActiveUser('sub') userId: number, @Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+		return this.usersService.update(userId, +id, updateUserDto)
+	}
+
+	@Patch('password/:id')
+	@Roles(Role.ADMIN)
+	async updatePassword(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+		this.usersService.comparePasswords(updateUserDto.password, updateUserDto.confirmPassword)
+		const hashedPassword = await this.hashingService.hash(updateUserDto.password)
+
+		return this.usersService.updatePassword(+id, hashedPassword)
 	}
 
 	@Delete(':id')
