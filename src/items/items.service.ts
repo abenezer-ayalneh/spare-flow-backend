@@ -93,7 +93,7 @@ export class ItemsService {
 		})
 	}
 
-	async checkShelfLocationInsideStore(storeId: number, shelfId: number) {
+	async checkShelfLocationInsideStore(shelfId: number, storeId: number) {
 		const shelf = await this.prismaService.shelf.findUnique({ where: { id: shelfId } })
 
 		if (!shelf) {
