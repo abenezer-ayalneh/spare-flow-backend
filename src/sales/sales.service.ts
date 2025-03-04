@@ -49,7 +49,7 @@ export class SalesService {
 	 */
 	async checkQuantity(itemId: number, quantity: number) {
 		const totalQuantity = await this.getTotalQuantity(itemId)
-		return totalQuantity > quantity
+		return totalQuantity >= quantity
 	}
 
 	/**
