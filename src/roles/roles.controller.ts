@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common'
+import { Body, Controller, Get, Param } from '@nestjs/common'
 
 import { Roles } from './decorators/roles.decorator'
 import { CreateRoleDto } from './dto/create-role.dto'
@@ -10,7 +10,7 @@ import { Role } from './types/roles.type'
 export class RolesController {
 	constructor(private readonly rolesService: RolesService) {}
 
-	@Post()
+	// @Post()
 	@Roles(Role.ADMIN)
 	create(@Body() createRoleDto: CreateRoleDto) {
 		return this.rolesService.create(createRoleDto)
@@ -26,13 +26,13 @@ export class RolesController {
 		return this.rolesService.findOne(+id)
 	}
 
-	@Patch(':id')
+	// @Patch(':id')
 	@Roles(Role.ADMIN)
 	update(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {
 		return this.rolesService.update(+id, updateRoleDto)
 	}
 
-	@Delete(':id')
+	// @Delete(':id')
 	@Roles(Role.ADMIN)
 	remove(@Param('id') id: string) {
 		return this.rolesService.remove(+id)

@@ -130,6 +130,12 @@ export default class AuthenticationService {
 				username: true,
 				name: true,
 				active: true,
+				Role: {
+					select: {
+						id: true,
+						name: true,
+					},
+				},
 			},
 		})
 	}
