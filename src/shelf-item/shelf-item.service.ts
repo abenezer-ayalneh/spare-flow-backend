@@ -1,14 +1,20 @@
 import { Injectable } from '@nestjs/common'
+import { EventEmitter2 } from '@nestjs/event-emitter'
+import { TransactionType } from '@prisma/client'
 
 import { UpdateQuantityDto } from '../items/dto/update-quantity.dto'
 import { PrismaService } from '../prisma/prisma.service'
+import { TransactionLogEvent } from '../transaction-log/events/transaction-log.event'
 
 @Injectable()
 export class ShelfItemService {
-	constructor(private readonly prismaService: PrismaService) {}
+	constructor(
+		private readonly prismaService: PrismaService,
+		private readonly eventEmitter: EventEmitter2,
+	) {}
 
-	incrementQuantity(shelfItemId: number, updateQuantityDto: UpdateQuantityDto) {
-		return this.prismaService.shelfItem.update({
+	async incrementQuantity(userId: number, shelfItemId: number, updateQuantityDto: UpdateQuantityDto) {
+		const updatedShelfItem = await this.prismaService.shelfItem.update({
 			where: {
 				id: shelfItemId,
 			},
@@ -24,6 +30,12 @@ export class ShelfItemService {
 				ShelfLocation: { select: { id: true, name: true, Store: { select: { id: true, name: true } } } },
 			},
 		})
+
+		this.eventEmitter.emit('transaction.log', [
+			new TransactionLogEvent(userId, updatedShelfItem.Item.id, updateQuantityDto.quantity, TransactionType.CREDIT),
+		])
+
+		return updatedShelfItem
 	}
 
 	decrementQuantity(shelfItemId: number, updateQuantityDto: UpdateQuantityDto) {
