@@ -7,6 +7,34 @@ import { TransactionLogEvent } from './events/transaction-log.event'
 export class TransactionLogService {
 	constructor(private readonly prismaService: PrismaService) {}
 
+	fetchAll() {
+		return this.prismaService.transactionLog.findMany({
+			select: {
+				id: true,
+				quantity: true,
+				remainingQuantity: true,
+				type: true,
+				createdAt: true,
+				Item: {
+					select: {
+						id: true,
+						name: true,
+						partNumber: true,
+						price: true,
+						source: true,
+					},
+				},
+				ResponsibleUser: {
+					select: {
+						id: true,
+						name: true,
+						username: true,
+					},
+				},
+			},
+		})
+	}
+
 	async createTransactionLogFromEvents(transactionLogEvents: TransactionLogEvent[]) {
 		const itemIds = transactionLogEvents.map((transactionLogEvent) => transactionLogEvent.itemId)
 
