@@ -1,14 +1,19 @@
 import * as crypto from 'node:crypto'
 
 import { Injectable, NotFoundException } from '@nestjs/common'
-import { Item, SaleStatus } from '@prisma/client'
+import { EventEmitter2 } from '@nestjs/event-emitter'
+import { Item, SaleStatus, TransactionType } from '@prisma/client'
 
 import { PrismaService } from '../prisma/prisma.service'
+import { TransactionLogEvent } from '../transaction-log/events/transaction-log.event'
 import { CreateSalesDto, ItemQuantityPair } from './dto/create-sales.dto'
 
 @Injectable()
 export class SalesService {
-	constructor(private readonly prismaService: PrismaService) {}
+	constructor(
+		private readonly prismaService: PrismaService,
+		private readonly eventEmitter: EventEmitter2,
+	) {}
 
 	async createSales(items: Item[], userId: number, createSalesDto: CreateSalesDto) {
 		const transactionId = crypto.randomUUID()
@@ -36,6 +41,13 @@ export class SalesService {
 						},
 					},
 				}),
+			),
+		)
+
+		this.eventEmitter.emit(
+			'transaction.log',
+			createSalesDto.itemQuantityPairs.map(
+				(itemQuantityPair) => new TransactionLogEvent(userId, itemQuantityPair.itemId, itemQuantityPair.quantity, TransactionType.DEBIT),
 			),
 		)
 

@@ -26,11 +26,12 @@ model User {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime? @updatedAt
 
-  Role         Role       @relation(fields: [roleId], references: [id])
-  Transfer     Transfer[]
-  Sale         Sale[]
-  Creator      User       @relation(fields: [createdBy], references: [id], name: "CreatorCreated")
-  CreatedUsers User[]     @relation(name: "CreatorCreated")
+  Role           Role             @relation(fields: [roleId], references: [id])
+  Transfer       Transfer[]
+  Sale           Sale[]
+  Creator        User             @relation(fields: [createdBy], references: [id], name: "CreatorCreated")
+  CreatedUsers   User[]           @relation(name: "CreatorCreated")
+  TransactionLog TransactionLog[]
 
   @@map("users")
 }
@@ -57,9 +58,10 @@ model Item {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime?  @updatedAt
 
-  ShelfItem ShelfItem[]
-  Sale      Sale[]
-  Transfer  Transfer[]
+  ShelfItem      ShelfItem[]
+  Sale           Sale[]
+  Transfer       Transfer[]
+  TransactionLog TransactionLog[]
 
   @@map("items")
 }
@@ -152,7 +154,27 @@ model Sale {
   @@map("sales")
 }
 
+model TransactionLog {
+  id                Int             @id @default(autoincrement())
+  userId            Int
+  itemId            Int
+  quantity          Int
+  type              TransactionType
+  remainingQuantity Int
+  createdAt         DateTime        @default(now())
+
+  Item            Item @relation(fields: [itemId], references: [id])
+  ResponsibleUser User @relation(fields: [userId], references: [id])
+
+  @@map("transaction-logs")
+}
+
 enum SaleStatus {
   PENDING
   PRINTED
+}
+
+enum TransactionType {
+  DEBIT
+  CREDIT
 }

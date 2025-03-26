@@ -17,6 +17,7 @@ import { SalesModule } from './sales/sales.module'
 import { ShelfItemModule } from './shelf-item/shelf-item.module'
 import { ShelvesModule } from './shelves/shelves.module'
 import { StoresModule } from './stores/stores.module'
+import { TransactionLogModule } from './transaction-log/transaction-log.module'
 import { UsersModule } from './users/users.module'
 import GlobalExceptionFilter from './utils/filters/global-exception.filter'
 
@@ -53,6 +54,7 @@ import GlobalExceptionFilter from './utils/filters/global-exception.filter'
 		ShelvesModule,
 		ShelfItemModule,
 		SalesModule,
+		TransactionLogModule,
 	],
 	controllers: [AppController],
 	providers: [AppService, Logger, { provide: APP_FILTER, useClass: GlobalExceptionFilter }],
