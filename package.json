@@ -20,7 +20,7 @@
 		"test:e2e": "jest --config ./test/jest-e2e.json",
 		"pretty-quick": "pretty-quick --staged",
 		"prepare": "husky",
-		"prisma:deploy": "prisma migrate deploy"
+		"prisma:deploy": "prisma migrate deploy && prisma generate"
 	},
 	"dependencies": {
 		"@nestjs/cache-manager": "^2.3.0",
