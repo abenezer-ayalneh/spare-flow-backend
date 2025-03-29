@@ -32,6 +32,9 @@ export class TransactionLogService {
 					},
 				},
 			},
+			orderBy: {
+				createdAt: 'desc',
+			},
 		})
 	}
 
