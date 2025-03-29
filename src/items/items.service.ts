@@ -1,16 +1,22 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common'
+import { EventEmitter2 } from '@nestjs/event-emitter'
+import { TransactionType } from '@prisma/client'
 
 import { PrismaService } from '../prisma/prisma.service'
+import { TransactionLogEvent } from '../transaction-log/events/transaction-log.event'
 import { CreateItemDto } from './dto/create-item.dto'
 import { UpdateItemDto } from './dto/update-item.dto'
 import { UpdatePriceDto } from './dto/update-price.dto'
 
 @Injectable()
 export class ItemsService {
-	constructor(private readonly prismaService: PrismaService) {}
+	constructor(
+		private readonly prismaService: PrismaService,
+		private readonly eventEmitter: EventEmitter2,
+	) {}
 
-	create(createItemDto: CreateItemDto) {
-		return this.prismaService.item.create({
+	async create(userId: number, createItemDto: CreateItemDto) {
+		const item = await this.prismaService.item.create({
 			data: {
 				name: createItemDto.name,
 				price: createItemDto.price,
@@ -20,6 +26,10 @@ export class ItemsService {
 				ShelfItem: { create: { shelfLocationId: createItemDto.shelfId, quantity: createItemDto.quantity } },
 			},
 		})
+
+		this.eventEmitter.emit('transaction.log', [new TransactionLogEvent(userId, item.id, createItemDto.quantity, TransactionType.CREDIT)])
+
+		return item
 	}
 
 	findAll() {

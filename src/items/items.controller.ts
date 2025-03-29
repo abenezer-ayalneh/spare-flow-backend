@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/commo
 
 import { Auth } from '../iam/authentication/decorators/auth.decorator'
 import AuthType from '../iam/authentication/enums/auth-type.enum'
+import ActiveUser from '../iam/decorators/active-user.decorator'
 import { Roles } from '../roles/decorators/roles.decorator'
 import { Role } from '../roles/types/roles.type'
 import { CreateItemDto } from './dto/create-item.dto'
@@ -16,10 +17,10 @@ export class ItemsController {
 
 	@Post()
 	@Roles(Role.ADMIN)
-	async create(@Body() createItemDto: CreateItemDto) {
+	async create(@ActiveUser('sub') userId: number, @Body() createItemDto: CreateItemDto) {
 		await this.itemsService.checkShelfLocationInsideStore(createItemDto.shelfId, createItemDto.storeId)
 
-		return this.itemsService.create(createItemDto)
+		return this.itemsService.create(userId, createItemDto)
 	}
 
 	@Get()
